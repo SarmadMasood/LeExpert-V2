@@ -24,6 +24,24 @@ const ExpertsScreen = (props) => {
           "dpPath": require("./assets/chef.png"),
           "occupation": "Neurologist",
         },
+        {
+          "id": "bd7acbea-c1b1-46c2-aed5-3ad53abb28ab",
+          "title": "Sue Holmes",
+          "dpPath": require("./assets/doctor.jpg"),
+          "occupation": "Cardiologist",
+        },
+        {
+          "id": "3ac68afc-c605-48d3-a4f8-fbd91aa97f36",
+          "title": "Isabel Lane",
+          "dpPath": require("./assets/civil.jpg"),
+          "occupation": "Gynacologist",
+        },
+        {
+          "id": "58694a0f-3da1-471f-bd96-145571e29d27",
+          "title": "Liaqat Malik",
+          "dpPath": require("./assets/chef.png"),
+          "occupation": "Neurologist",
+        },
       ];
 
       
@@ -32,10 +50,10 @@ const ExpertsScreen = (props) => {
       const Item = ({ item, onPress, style }) => (
         <TouchableOpacity onPress={onPress} activeOpacity={.8}>
           <View style = {styles.itemContainer}>
-             <Image style={styles.Circle}></Image>
+             <Image style={styles.Circle} borderRadius={27.5}></Image>
              <View style={styles.rowView}>
                 <Text style={styles.title}>{item.title}</Text>
-                <Image style = {styles.verified} source = {require('./assets/verified.png')}></Image>
+                <Image style = {styles.verified} source = {require('./assets/verified.png')} ></Image>
              </View>
              <View style={styles.rowView}>
               <Text style={styles.occupation}>{item.occupation}</Text>
@@ -88,7 +106,7 @@ const styles = StyleSheet.create({
         shadowColor: 'black',
         shadowOpacity: 0.4,
         shadowOffset:{width:1,height:1},
-        elevation: 8,
+        elevation: 1,
     },
     itemContainer:{
         height: 150,
@@ -110,17 +128,17 @@ const styles = StyleSheet.create({
     time: {
         fontSize: 18,
         marginLeft: 30,
-        marginTop: 0,
+        marginTop: 10,
     },
     Circle: {
         position: "absolute",
         height: 55,
         width: 55,
+        borderRadius: 27.5,
         marginLeft: 15,
         backgroundColor: '#07252E',
-        borderRadius: 27.5,
-        resizeMode: "contain",
         marginTop: 12,
+        overflow: 'hidden'
       },
       flag: {
         height: 27,
@@ -147,7 +165,7 @@ const styles = StyleSheet.create({
       desc: {
           color: '#6D6D6D',
           width: 250,
-          height: 45,
+          height: 35,
           marginLeft: 80,
           marginTop: 5,
       },

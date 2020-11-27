@@ -1,21 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Dimensions, ViewPropTypes, Picker} from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Dimensions, ViewPropTypes} from 'react-native';
 import DatePicker from 'react-native-datepicker'
 import Moment from 'moment'
 import RNPickerSelect from 'react-native-picker-select';
+import {Picker} from '@react-native-picker/picker';
 import { Button } from 'react-native-paper';
 
+
 const BookAppointScreen = (props) => {
-    const [selectedValue, setSelectedValue] = useState("java");
+    const [selectedValue, setSelectedValue] = useState(10);
     const show = true
-    Moment.locale('llll');
+    // Moment.locale('llll');
     var date = new Date().toString()
     const placeholder = {
         label: 'Select',
         value: null,
         color: '#000'
     }
+    
     return (
         <View style={styles.container}>
             <Text style={styles.guideText}>You are Booking an appointment with</Text>
@@ -26,9 +29,11 @@ const BookAppointScreen = (props) => {
                     <Text style={styles.text2}>Malik Liaqat</Text>
                     <Text style={styles.text3}>Gynecologist</Text>
                 </View>
+                <Text style={styles.text5}>10$/min</Text>
                 </View>
                 
                 <DatePicker
+                useNativeDriver = {true}
         style={{width: 230, marginTop: 20}}
         date={Moment(date).format('llll')}
         mode="datetime"
@@ -57,10 +62,12 @@ const BookAppointScreen = (props) => {
          <Text style={styles.text2}>Appointment Length:</Text>
         
             <View style={styles.timeButton}>
+      
             <RNPickerSelect 
             style={pickerStyle}
             placeholder={placeholder}
-            onValueChange={(value) => alert(value)}
+            useNativeAndroidPickerStyle={false}
+            onValueChange={(value) => setSelectedValue(value)}
             items={[
                 { label: '10 minutes', value: '10' },
                 { label: '20 minutes', value: '20' },
@@ -80,11 +87,11 @@ const BookAppointScreen = (props) => {
                 and even Adobe's own PostScript format.
      </Text>
      <View style={styles.bottomView}>
-            <Button style={styles.confirmButton} onPress={()=> props.navigation.navigate('CardFormScreen')}>
+            <Button style={styles.confirmButton} onPress={()=> props.navigation.navigate('AddSubscription',{'charges': selectedValue*10})}>
                 <Text style={styles.confirmText}>Confirm</Text>
             </Button>
      </View>
-
+        
     </View>
     );
 }
@@ -191,17 +198,28 @@ const styles = StyleSheet.create({
         color: '#07252E',
         fontSize: 16
     },
-
+    text5: {
+        position: 'absolute',
+        color: '#07252E',
+        fontSize: 18,
+        top: 2,
+        right: 20
+    },
 });
 
-const pickerStyle = StyleSheet.create({
+const  pickerStyle= StyleSheet.create({
     inputIOS: {
         alignSelf: 'center',
         fontSize: 20,
     },
     inputAndroid: {
         alignSelf: 'center',
-        fontSize: 20,
+        fontSize: 16,
+        color: '#000'
+    },
+    inputAndroidContainer: {
+        height: 30,
+        width: 85,
     }
 });
 

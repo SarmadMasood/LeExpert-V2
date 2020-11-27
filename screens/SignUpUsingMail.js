@@ -1,25 +1,68 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, {useState} from 'react';
 import { StyleSheet, Text, View, Dimensions} from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { Button } from 'react-native-paper';
-import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
+import RadioForm from 'react-native-simple-radio-button';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as firebase from 'firebase';
 
 const SignUpUsingMail = (props) => {
     var radio_props = [
-        {label: 'Male            ', value: 0 },
-        {label: 'Female', value: 1 }
+        {label: 'User            ', value: 0 },
+        {label: 'Expert', value: 1 }
       ];
+      const [name, setName] = useState(null);
+      const [email, setEmail] = useState(null);
+      const [password, setPassword] = useState(null);
+      const [cpassword, setcPassword] = useState(null);
+
+      async function setUserType(user) {
+        try {
+            await AsyncStorage.setItem('usertype', user.toString())
+          } catch (e) {
+            console.log(e)
+          }
+    }
+
+      const handleSignUp = (props) => {
+        if (email!= null && email.length !=0 && password!= null && password.length !=0 ){
+            if (password == cpassword){
+                props.navigation.navigate('LoadingScreen')
+                 firebase.auth()
+                 .createUserWithEmailAndPassword(email, password)
+                .then((result) => {alert('sign up done!')
+                    console.log("result nigga! : \n",result)
+                    firebase.database().ref('users/' + result.user.uid).set({
+                    email: email,
+                    imageURL: null,
+                    name: name
+                    }).then(function(snapshot){
+                    console.log('Snapshot of user: ',snapshot)
+                    })
+                }).catch(err => {
+                    alert(err)
+                    props.navigation.navigate('MailSignUp')
+                })
+
+            }else{
+            alert('Passwords do not match.')
+            }
+        }else{
+            alert('Please fill in all the fields.')
+        }
+    }
+
     return (
         <View style = {styles.container}>
             <Text style = {styles.signUpText}>Sign Up</Text>
             <Text style = {styles.guideText}>Please fill your info{"\n"}in the fields</Text>
             <View style = {styles.subContainer1}>
             
-            <TextInput style = {styles.inputField} placeholder ="Name"></TextInput>
-            <TextInput style = {styles.inputField} placeholder ="Email"></TextInput>
-            <TextInput style = {styles.inputField} placeholder ="Password"></TextInput>
-            <TextInput style = {styles.inputField} placeholder ="Confirm Password"></TextInput>
+            <TextInput style = {styles.inputField} placeholder ="Name" onChangeText={(username) => setName(username)}></TextInput>
+            <TextInput style = {styles.inputField} value={email} placeholder ="Email" onChangeText={(mail) => setEmail(mail)}></TextInput>
+            <TextInput style = {styles.inputField} value={password} placeholder ="Password" onChangeText={(pass) => setPassword(pass)} secureTextEntry={true}></TextInput>
+            <TextInput style = {styles.inputField} placeholder ="Confirm Password" secureTextEntry={true} onChangeText={(cpass) => setcPassword(cpass)}></TextInput>
             </View>
 
             <RadioForm style = {styles.radioStyle}
@@ -29,9 +72,9 @@ const SignUpUsingMail = (props) => {
                     radio_props={radio_props}
                     initial={-1}
                     animation = 'true'
-                    onPress={(value) => {alert(value.toString())}}
+                    onPress={(value) => setUserType(value)}
                 />
-            <Button style ={styles.signUpButton} onPress = {() => {}}>
+            <Button style ={styles.signUpButton} onPress = {() => handleSignUp(props)}>
                <Text style={styles.buttonText} >Sign Up</Text> 
             </Button>       
         </View>

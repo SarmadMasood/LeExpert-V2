@@ -1,23 +1,55 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, {useState} from 'react';
 import { StyleSheet, Text, View, TouchableWithoutFeedback, Dimensions} from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { Button } from 'react-native-paper';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as firebase from 'firebase';
 
 const SignInScreen = (props) => {
+    const [email, setEmail] = useState(null);
+    const [password, setPassword] = useState(null);
     var radio_props = [
         {label: 'User            ', value: 0 },
         {label: 'Expert', value: 1 }
       ];
+
+    async function setUserType(user) {
+        try {
+            await AsyncStorage.setItem('usertype', user.toString())
+            console.log('value:', user.toString())
+          } catch (e) {
+            console.log(e)
+          }
+    }
+
+    async function signInWithEmail() {
+        if (email!= null && email.length !=0 && password!= null && password.length !=0 ){
+            props.navigation.navigate('LoadingScreen')
+        await firebase
+          .auth()
+          .signInWithEmailAndPassword(email, password)
+          .catch(error => {
+              let errorCode = error.code;
+              let errorMessage = error.message;
+              alert(errorMessage)
+              props.navigation.navigate('SignInScreen')
+
+            //   if (errorCode == 'auth/weak-password') {
+          });
+        }else{
+            alert('Please fill in all the fields.')
+        }
+      }
+
     return (
         <View style = {styles.container}>
              <View style = {styles.subContainer1}>
                 <Text style = {styles.signInText}>Sign In</Text>
                 <Text style = {styles.guideText}>Please fill your info{"\n"}in the fields</Text>
-                <TextInput style = {styles.inputField} placeholder ="Email"></TextInput>
-                <TextInput style = {styles.inputField} placeholder ="Password"></TextInput>
+                <TextInput style = {styles.inputField} value={email} placeholder ="Email" onChangeText={(mail) => setEmail(mail)}></TextInput>
+                <TextInput style = {styles.inputField} value={password} placeholder ="Password" onChangeText={(pass) => setPassword(pass)} secureTextEntry={true}></TextInput>
              </View>
             
         
@@ -28,9 +60,9 @@ const SignInScreen = (props) => {
               radio_props={radio_props}
               initial={-1}
               animation = 'true'
-              onPress={(value) => {alert(value.toString())}}
+              onPress={(value) => setUserType(value)}
             />
-            <Button style ={styles.signInButton} onPress = {() => props.navigation.navigate('Home')}>
+            <Button style ={styles.signInButton} onPress = {() => signInWithEmail()}>
                <Text style={styles.buttonText} >Sign In</Text> 
             </Button>
 
@@ -87,9 +119,8 @@ const styles = StyleSheet.create({
         color: '#07252E',
     },
     signUpText:{
-        position: 'absolute',
+        marginTop: Dimensions.get('window').height/5,
         fontSize: 16,
-        bottom: Dimensions.get('window').height/11.5,
     },
     subContainer1: {
         alignItems: 'center',

@@ -1,16 +1,72 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, Image,FlatList,TouchableOpacity, Modal, Dimensions} from 'react-native';
-import { color } from 'react-native-reanimated';
-import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
+import { StyleSheet, Text, View, Image,FlatList,TouchableOpacity, Modal, Dimensions, As} from 'react-native';
+import RadioButton from 'react-native-radio-button'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GroupsScreen = (props) => {
     const [selectedId, setSelectedId] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    var radio_props = [
-        {label: 'param1', value: 0 },
-        {label: 'param2', value: 1 }
-      ];
+    const [radioValues, setRadioValues] = useState({
+      radio1: false,
+      radio2: false,
+      radio3: false,
+    });
+    const [charges, setCharges] = useState(0);
+
+    const book = async () => {
+      setModalVisible(!modalVisible)
+      props.navigation.navigate('AddSubscription',{'charges': charges})
+    }
+
+    const handleItemSelect = async () => {
+      try {
+        const paid = await AsyncStorage.getItem('paidgroup')
+        if(paid !== null) {
+          props.navigation.navigate('GroupDetailScreen')
+        }else{
+          setModalVisible(!modalVisible)
+        }
+      } catch (e) {
+        // saving error
+      }
+    }
+
+
+    const onRadioSelect = (radio) => {
+      if (radio ==1){
+        if (radioValues.radio2==true){
+          setRadioValues({radio2: !radioValues.radio2})
+        }
+        if (radioValues.radio3==true){
+          setRadioValues({radio3: !radioValues.radio3})
+        }
+        setRadioValues({radio1: !radioValues.radio1})
+        setCharges(15)
+      }
+
+      if (radio ==2){
+        if (radioValues.radio1==true){
+          setRadioValues({radio1: !radioValues.radio1})
+        }
+        if (radioValues.radio3==true){
+          setRadioValues({radio3: !radioValues.radio3})
+        }
+        setRadioValues({radio2: !radioValues.radio2})
+        setCharges(25)
+      }
+
+      if (radio ==3){
+        if (radioValues.radio2==true){
+          setRadioValues({radio2: !radioValues.radio2})
+        }
+        if (radioValues.radio1==true){
+          setRadioValues({radio1: !radioValues.radio1})
+        }
+        setRadioValues({radio3: !radioValues.radio3})
+        setCharges(35)
+      }
+    }
     const DATA = [
         {
           "id": "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
@@ -35,9 +91,6 @@ const GroupsScreen = (props) => {
         },
       ];
 
-      
-      
-
       const Item = ({ item, onPress, style }) => (
         <TouchableOpacity onPress={onPress} activeOpacity={.8}>
           <View style = {styles.itemContainer}>
@@ -61,23 +114,27 @@ const GroupsScreen = (props) => {
         return (
           <Item
             item={item}
-            onPress={() => setModalVisible(true)}
+            onPress={() => handleItemSelect()}
           />
         );
       };
       
     return (
         <View style = {styles.container}>
-            <FlatList style = {styles.subContainer} contentContainerStyle = {{padding:5}}
+          <View>
+            {(!modalVisible && <FlatList style = {styles.subContainer} contentContainerStyle = {{padding:5}}
             data={DATA}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             extraData={selectedId}>
           
-          </FlatList>
+          </FlatList>)}
+          
+          </View>
+           
+          
       <StatusBar style="auto" />
-
-     {(modalVisible && <View style={styles.fade}></View>)} 
+      {(modalVisible && <View style={styles.fade}/>)}
       
       <Modal
         animationType="fade"
@@ -92,30 +149,58 @@ const GroupsScreen = (props) => {
             <Text style={styles.title}>Plan Summary</Text>
             
             <View style={styles.borderContainer}>
-            
+              <RadioButton
+                 animation={'bounceIn'}
+                 innerColor={'#07252E'}
+                 outerColor={'#6AD3D6'}
+                 isSelected={radioValues.radio1}
+                 onPress={() => onRadioSelect(1)}/>
+
+                 <Text style={styles.offer}>5 Class Bundle</Text>
+                 <Text style={styles.offerValue}>$15</Text>
             </View>
 
             <View style={styles.borderContainer}>
+              <RadioButton
+                 animation={'bounceIn'}
+                 innerColor={'#07252E'}
+                 outerColor={'#6AD3D6'}
+                 isSelected={radioValues.radio2}
+                 onPress={() => onRadioSelect(2)}/>
 
+                <Text style={styles.offer}>10 Class Bundle</Text>
+                <Text style={styles.offerValue}>$25</Text>
             </View>
 
             <View style={styles.borderContainer}>
+              <RadioButton
+                 animation={'bounceIn'}
+                 innerColor={'#07252E'}
+                 outerColor={'#6AD3D6'}
+                 isSelected={radioValues.radio3}
+                 onPress={() => onRadioSelect(3)}/>
 
+                <Text style={styles.offer}>Monthly</Text>
+                <Text style={styles.offerValue}>$35/month</Text>
             </View>
 
-            <TouchableOpacity activeOpacity={0.75} onPress={() => setModalVisible(!modalVisible)}>
+           <View style={styles.modalSubView}>
+           <TouchableOpacity activeOpacity={0.75} onPress={() => book()}>
               <View style={styles.bookButton}>
                   <Text style={styles.bookText}>Book</Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.75} onPress={() => setModalVisible(!modalVisible)}>
+              <View style={styles.bookButton}>
+                  <Text style={styles.bookText}>Cancel</Text>
+              </View>
+            </TouchableOpacity>
+           </View>
           </View>
         </View>
       </Modal>
-
-
         </View>
     );
-  
 }
 
 const styles = StyleSheet.create({
@@ -151,8 +236,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginLeft: 30,
         marginTop: 0,
-        color: '#373636',
-        //fontWeight: 'bold'
+        color: '#373636'
     },
     Circle: {
         position: "absolute",
@@ -161,7 +245,6 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         backgroundColor: '#07252E',
         borderRadius: 27.5,
-        resizeMode: "contain",
         marginTop: 12,
       },
       join: {
@@ -215,7 +298,6 @@ const styles = StyleSheet.create({
       fade: {
           opacity: 0.4,
           backgroundColor: '#000',
-          flex: 1,
           position: 'absolute',
           height: Dimensions.get('window').height,
           width: Dimensions.get('window').width
@@ -241,12 +323,29 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderWidth: 1.25,
         marginTop: 20,
-        borderColor: '#5C9192'
+        borderColor: '#5C9192',
+        flexDirection: 'row',
+        paddingStart: 15,
+        
+      },
+      offer: {
+        fontSize: 20,
+        color: '#07252E',
+        alignSelf: 'center',
+        marginLeft: 15
+      },
+      offerValue: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#07252E',
+        alignSelf: 'center',
+        marginLeft: Dimensions.get('window').width/9
+      },
+      modalSubView: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: Dimensions.get('window').width-120,
       }
 });
-
-const radioLabel = {
-    label: 'hhh'
-}
 
 export default GroupsScreen;
